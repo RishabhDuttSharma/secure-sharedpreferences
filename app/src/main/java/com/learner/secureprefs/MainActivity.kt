@@ -8,5 +8,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        RSABase64StringProcessor(RSAKeyStoreHelper.getKeyPair(this, "prefs"))
     }
 }

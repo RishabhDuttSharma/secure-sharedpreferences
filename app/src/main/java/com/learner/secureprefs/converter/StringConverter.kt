@@ -1,10 +1,12 @@
-package com.learner.secureprefs
+package com.learner.secureprefs.converter
+
+import com.learner.secureprefs.ModelByteArrayConverter
 
 /**
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/25/2018
  */
-class StringConverter : RSAProcessor.ModelByteArrayConverter<String> {
+class StringConverter : ModelByteArrayConverter<String> {
 
     override fun toByteArray(input: String) = input.toByteArray()
 
