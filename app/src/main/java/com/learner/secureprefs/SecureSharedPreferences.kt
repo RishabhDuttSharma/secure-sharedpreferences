@@ -2,14 +2,13 @@ package com.learner.secureprefs
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.learner.secureprefs.security.SecurityProcessor
 
 /**
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/27/2018
  */
-class SecureSharedPreferences(private val sharedPreferences: SharedPreferences) : SharedPreferences {
-
-    constructor(context: Context, name: String = "secure-prefs", mode: Int = Context.MODE_PRIVATE) : this(context.getSharedPreferences(name, mode))
+class SecureSharedPreferences private constructor(private val sharedPreferences: SharedPreferences, private val encoder: SecurityProcessor, private val decoder: SecurityProcessor) : SharedPreferences {
 
     override fun contains(key: String?): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -53,5 +52,23 @@ class SecureSharedPreferences(private val sharedPreferences: SharedPreferences) 
 
     override fun getString(key: String?, defValue: String?): String? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    class Builder(private val sharedPreferences: SharedPreferences) {
+
+        constructor(context: Context, name: String = "secure-prefs", mode: Int = Context.MODE_PRIVATE) : this(context.getSharedPreferences(name, mode))
+
+        private var encoder: SecurityProcessor? = null
+
+        private var decoder: SecurityProcessor? = null
+
+        fun setEncoder(encoder: SecurityProcessor) = also { this@Builder.encoder = encoder }
+
+        fun setDecoder(decoder: SecurityProcessor) = also { this@Builder.decoder = decoder }
+
+        fun build() = SecureSharedPreferences(sharedPreferences,
+                encoder ?: throw NullPointerException("Encoder not initialized!"),
+                decoder ?: throw NullPointerException("Decoder not initialized!"))
+
     }
 }
