@@ -1,4 +1,4 @@
-package com.learner.secureprefs
+package com.learner.secureprefs.security
 
 import java.security.Key
 import javax.crypto.Cipher

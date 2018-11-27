@@ -1,7 +1,7 @@
-package com.learner.secureprefs
+package com.learner.secureprefs.security.impl
 
-import com.learner.secureprefs.converter.Base64Converter
-import com.learner.secureprefs.converter.StringConverter
+import com.learner.secureprefs.security.converter.Base64Converter
+import com.learner.secureprefs.security.converter.StringConverter
 import java.security.KeyPair
 
 /**

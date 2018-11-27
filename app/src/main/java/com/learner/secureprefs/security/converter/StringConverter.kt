@@ -1,6 +1,6 @@
-package com.learner.secureprefs.converter
+package com.learner.secureprefs.security.converter
 
-import com.learner.secureprefs.ModelByteArrayConverter
+import com.learner.secureprefs.security.ModelByteArrayConverter
 
 /**
  * Developer: Rishabh Dutt Sharma

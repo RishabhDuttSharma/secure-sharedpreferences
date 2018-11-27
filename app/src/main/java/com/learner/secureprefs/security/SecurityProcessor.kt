@@ -1,4 +1,4 @@
-package com.learner.secureprefs
+package com.learner.secureprefs.security
 
 /**
  * Developer: Rishabh Dutt Sharma
