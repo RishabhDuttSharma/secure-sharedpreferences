@@ -69,6 +69,5 @@ class SecureSharedPreferences private constructor(private val sharedPreferences:
         fun build() = SecureSharedPreferences(sharedPreferences,
                 encoder ?: throw NullPointerException("Encoder not initialized!"),
                 decoder ?: throw NullPointerException("Decoder not initialized!"))
-
     }
 }
