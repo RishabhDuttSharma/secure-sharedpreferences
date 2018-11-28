@@ -28,14 +28,18 @@ object AESKeyStoreHelper {
         val encoderDecoder = RSABase64StringEncoderDecoder(RSAKeyStoreHelper.getKeyPair(context, Constant.KEY_ALIAS_RSA))
 
         val sharedPrefsName = encoderDecoder.encode(alias)
+        val sharedPrefsKey = "key_$sharedPrefsName"
         val sharedPreferences = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
 
-        val encodedKey = sharedPreferences.getString(sharedPrefsName, null)
+        val encodedKey = sharedPreferences.getString(sharedPrefsKey, null)
+
         return SecretKeySpec(if (encodedKey != null) encoderDecoder.decode(encodedKey).toByteArray()
-        else ByteArray(16).apply { SecureRandom().nextBytes(this) }.also {
-            sharedPreferences.edit().putString(sharedPrefsName, encoderDecoder.encode(String(it))).apply()
+        else getRandomByteArray().also {
+            sharedPreferences.edit().putString(sharedPrefsKey, encoderDecoder.encode(String(it))).apply()
         }, "AES")
     }
+
+    private fun getRandomByteArray() = ByteArray(16).apply { SecureRandom().nextBytes(this) }
 
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -54,8 +58,8 @@ object AESKeyStoreHelper {
     private fun generateSecretKey(alias: String) = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").run {
 
         init(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build())
 
         generateKey()
