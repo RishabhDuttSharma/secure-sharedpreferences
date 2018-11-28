@@ -1,4 +1,4 @@
-package com.learner.secureprefs.security.impl
+package com.learner.secureprefs.security.impl.rsa
 
 import com.learner.secureprefs.security.converter.Base64Converter
 import com.learner.secureprefs.security.converter.StringConverter

@@ -1,7 +1,6 @@
-package com.learner.secureprefs.security.impl
+package com.learner.secureprefs.security.impl.rsa
 
 import com.learner.secureprefs.security.ModelByteArrayConverter
-import com.learner.secureprefs.security.RSAProcessor
 import com.learner.secureprefs.security.SecurityEncoderDecoder
 import java.security.KeyPair
 import javax.crypto.Cipher
@@ -12,9 +11,9 @@ import javax.crypto.Cipher
  */
 open class RSAEncoderDecoder<S, T>(keyPair: KeyPair, private val sourceConverter: ModelByteArrayConverter<S>, private val targetConverter: ModelByteArrayConverter<T>) : SecurityEncoderDecoder<S, T> {
 
-    private val encoder = RSAProcessor(Cipher.ENCRYPT_MODE, keyPair.public)
+    val encoder = RSAProcessor(Cipher.ENCRYPT_MODE, keyPair.public)
 
-    private val decoder = RSAProcessor(Cipher.DECRYPT_MODE, keyPair.private)
+    val decoder = RSAProcessor(Cipher.DECRYPT_MODE, keyPair.private)
 
     override fun encode(input: S): T = process(encoder, sourceConverter, targetConverter, input)
 
