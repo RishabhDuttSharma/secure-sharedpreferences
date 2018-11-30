@@ -5,6 +5,7 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.support.annotation.RequiresApi
+import android.util.Log
 import com.learner.secureprefs.security.impl.Constant
 import com.learner.secureprefs.security.impl.rsa.RSABase64StringEncoderDecoder
 import com.learner.secureprefs.security.impl.rsa.RSAKeyStoreHelper
@@ -49,17 +50,17 @@ object AESKeyStoreHelper {
 
         // retrieve Keys, create and return KeyPair, if exists
         if (containsAlias(alias))
-            getKey(alias, null) as SecretKey
+            (getKey(alias, null) as SecretKey).also { Log.e("AES", "Imported existing key!") }
         // generate a new KeyPair, if exists no entry for alias
-        else generateSecretKey(alias)
+        else generateSecretKey(alias).also { Log.e("AES", "Generated new key!") }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun generateSecretKey(alias: String) = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").run {
 
         init(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
                 .build())
 
         generateKey()
