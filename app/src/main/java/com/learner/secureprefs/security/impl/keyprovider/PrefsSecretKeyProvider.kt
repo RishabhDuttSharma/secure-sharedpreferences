@@ -1,10 +1,12 @@
 package com.learner.secureprefs.security.impl.keyprovider
 
 import android.content.Context
-import com.learner.secureprefs.security.impl.Constant
-import com.learner.secureprefs.security.impl.rsa.RSABase64StringEncoderDecoder
-import com.learner.secureprefs.security.impl.rsa.RSAKeyStoreHelper
+import android.text.TextUtils
+import android.util.Base64
+import com.learner.secureprefs.security.KeyProvider
+import com.learner.secureprefs.security.impl.rsa.RSAProcessor
 import java.security.SecureRandom
+import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
@@ -12,39 +14,22 @@ import javax.crypto.spec.SecretKeySpec
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/25/2018
  */
-class PrefsSecretKeyProvider(context: Context): KeyProvider<SecretKey> {
+class PrefsSecretKeyProvider(context: Context) : KeyProvider<SecretKey> {
 
+    private val providerAlias = "prefs-provider"
 
+    private val encoder by lazy { RSAProcessor(Cipher.ENCRYPT_MODE, KeyStorePublicKeyProvider(context).getKey(providerAlias)) }
+    private val decoder by lazy { RSAProcessor(Cipher.DECRYPT_MODE, KeyStorePrivateKeyProvider(context).getKey(providerAlias)) }
 
-    override fun containsKey(alias: String): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    private val sharedPreferences = context.getSharedPreferences(providerAlias, Context.MODE_PRIVATE)
 
-    override fun generateKey(alias: String): SecretKey {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun containsKey(alias: String): Boolean = sharedPreferences.contains(alias) && !TextUtils.isEmpty(sharedPreferences.getString(alias, null))
 
-    override fun getExistingKey(alias: String): SecretKey {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun generateKey(alias: String): SecretKey =
+            SecretKeySpec(ByteArray(16).apply { SecureRandom().nextBytes(this) }.also {
+                sharedPreferences.edit().putString(alias, Base64.encodeToString(encoder.process(it), Base64.NO_WRAP)).apply()
+            }, "AES")
 
-    fun getSecretKey(context: Context, alias: String): SecretKey = getSecretKeyFromPrefs(context, alias)
-
-    private fun getSecretKeyFromPrefs(context: Context, alias: String): SecretKey {
-
-        val encoderDecoder = RSABase64StringEncoderDecoder(RSAKeyStoreHelper.getKeyPair(context, Constant.KEY_ALIAS_RSA))
-
-        val sharedPrefsName = encoderDecoder.encode(alias)
-        val sharedPrefsKey = "key_$sharedPrefsName"
-        val sharedPreferences = context.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE)
-
-        val encodedKey = sharedPreferences.getString(sharedPrefsKey, null)
-
-        return SecretKeySpec(if (encodedKey != null) encoderDecoder.decode(encodedKey).toByteArray()
-        else getRandomByteArray().also {
-            sharedPreferences.edit().putString(sharedPrefsKey, encoderDecoder.encode(String(it))).apply()
-        }, "AES")
-    }
-
-    private fun getRandomByteArray() = ByteArray(16).apply { SecureRandom().nextBytes(this) }
+    override fun getExistingKey(alias: String): SecretKey =
+            SecretKeySpec(decoder.process(Base64.decode(sharedPreferences.getString(alias, null), Base64.NO_WRAP)), "AES")
 }

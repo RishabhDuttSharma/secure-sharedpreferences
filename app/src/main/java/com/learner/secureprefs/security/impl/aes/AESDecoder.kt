@@ -12,7 +12,7 @@ import javax.crypto.spec.IvParameterSpec
  */
 open class AESDecoder(private val securityKey: Key) : SecurityProcessor {
 
-    val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+    private val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
 
     override fun process(input: ByteArray): ByteArray = cipher.run {
 

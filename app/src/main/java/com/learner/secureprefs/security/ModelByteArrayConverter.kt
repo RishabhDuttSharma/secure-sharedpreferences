@@ -4,9 +4,9 @@ package com.learner.secureprefs.security
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/26/2018
  */
-interface ModelByteArrayConverter<X> {
+interface ModelByteArrayConverter<T> {
 
-    fun toByteArray(input: X): ByteArray
+    fun toByteArray(input: T): ByteArray
 
-    fun fromByteArray(byteArray: ByteArray): X
+    fun fromByteArray(byteArray: ByteArray): T
 }

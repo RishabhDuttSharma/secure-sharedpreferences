@@ -1,4 +1,4 @@
-package com.learner.secureprefs.security.impl.keyprovider
+package com.learner.secureprefs.security
 
 import java.security.Key
 

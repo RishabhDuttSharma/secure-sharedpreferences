@@ -7,12 +7,14 @@ import android.util.Log
 import com.learner.secureprefs.security.impl.Constant
 import com.learner.secureprefs.security.impl.aes.AESDecoder
 import com.learner.secureprefs.security.impl.aes.AESEncoder
-import com.learner.secureprefs.security.impl.keyprovider.PrefsSecretKeyProvider
-import com.learner.secureprefs.security.impl.rsa.RSABase64StringEncoderDecoder
-import com.learner.secureprefs.security.impl.rsa.RSAKeyStoreHelper
+import com.learner.secureprefs.security.impl.keyprovider.KeyStorePrivateKeyProvider
+import com.learner.secureprefs.security.impl.keyprovider.KeyStorePublicKeyProvider
+import com.learner.secureprefs.security.impl.keyprovider.KeyStoreSecretKeyProvider
+import com.learner.secureprefs.security.impl.rsa.RSAProcessor
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import javax.crypto.Cipher
 
 /**
  * Developer: Rishabh Dutt Sharma
@@ -22,27 +24,22 @@ import org.junit.runner.RunWith
 class RSAEncryptionTest {
 
     @Test
-    fun checkRSAKeyPairGeneration() {
-        Assert.assertNotNull(RSAKeyStoreHelper.getKeyPair(InstrumentationRegistry.getContext(), "test-prefs"))
-    }
-
-    @Test
     fun checkRSAKeyPairIntegrity() {
-        val keyPair = RSAKeyStoreHelper.getKeyPair(InstrumentationRegistry.getContext(), "test-prefs")
-        val processor = RSABase64StringEncoderDecoder(keyPair)
 
-        val rawText = "sample-text"
+        val alias = "test-prefs"
 
-        val encodedText = processor.encode(rawText)
-        val decodedText = processor.decode(encodedText)
+        val encoder = RSAProcessor(Cipher.ENCRYPT_MODE, KeyStorePublicKeyProvider(InstrumentationRegistry.getContext()).getKey(alias))
+        val decoder = RSAProcessor(Cipher.DECRYPT_MODE, KeyStorePrivateKeyProvider(InstrumentationRegistry.getContext()).getKey(alias))
 
-        Assert.assertEquals(rawText, decodedText)
+        val rawText = "sample-text".toByteArray()
+
+        Assert.assertArrayEquals(decoder.process(encoder.process(rawText)), rawText)
     }
 
     @Test
     fun checkAESIntegrity() {
 
-        val secretKey = PrefsSecretKeyProvider.getSecretKey(InstrumentationRegistry.getContext(), Constant.KEY_ALIAS_AES)
+        val secretKey = KeyStoreSecretKeyProvider().getKey(Constant.KEY_ALIAS_AES)
 
         val rawText = "sample-text".toByteArray()
 
