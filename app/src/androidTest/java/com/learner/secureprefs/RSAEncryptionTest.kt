@@ -2,10 +2,12 @@ package com.learner.secureprefs
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
+import android.util.Base64
+import android.util.Log
 import com.learner.secureprefs.security.impl.Constant
 import com.learner.secureprefs.security.impl.aes.AESDecoder
 import com.learner.secureprefs.security.impl.aes.AESEncoder
-import com.learner.secureprefs.security.impl.aes.AESKeyStoreHelper
+import com.learner.secureprefs.security.impl.keyprovider.PrefsSecretKeyProvider
 import com.learner.secureprefs.security.impl.rsa.RSABase64StringEncoderDecoder
 import com.learner.secureprefs.security.impl.rsa.RSAKeyStoreHelper
 import org.junit.Assert
@@ -40,11 +42,13 @@ class RSAEncryptionTest {
     @Test
     fun checkAESIntegrity() {
 
-        val secretKey = AESKeyStoreHelper.getSecretKey(InstrumentationRegistry.getContext(), Constant.KEY_ALIAS_AES)
+        val secretKey = PrefsSecretKeyProvider.getSecretKey(InstrumentationRegistry.getContext(), Constant.KEY_ALIAS_AES)
 
         val rawText = "sample-text".toByteArray()
 
         val encodedText = AESEncoder(secretKey).process(rawText)
+
+        Log.e("AES", "Encoded Text Length: ${Base64.encodeToString(encodedText, Base64.NO_WRAP)}")
 
         val decryter = AESDecoder(secretKey)
         val decodedText = decryter.process(encodedText)
