@@ -11,7 +11,7 @@ import javax.crypto.SecretKey
  * Developer: Rishabh Dutt Sharma
  * Dated: 12/1/2018
  */
-class KeyStoreSecretKeyProvider : KeyStoreKeyProvider<SecretKey>() {
+object KeyStoreSecretKeyProvider : KeyStoreKeyProvider<SecretKey>() {
 
     override fun getExistingKey(alias: String): SecretKey = androidKeyStore.getKey(alias, null) as SecretKey
 

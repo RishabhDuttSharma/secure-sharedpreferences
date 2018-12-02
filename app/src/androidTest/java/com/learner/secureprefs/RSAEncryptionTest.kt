@@ -4,7 +4,6 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import android.util.Base64
 import android.util.Log
-import com.learner.secureprefs.security.impl.Constant
 import com.learner.secureprefs.security.impl.aes.AESDecoder
 import com.learner.secureprefs.security.impl.aes.AESEncoder
 import com.learner.secureprefs.security.impl.keyprovider.KeyStorePrivateKeyProvider
@@ -39,7 +38,7 @@ class RSAEncryptionTest {
     @Test
     fun checkAESIntegrity() {
 
-        val secretKey = KeyStoreSecretKeyProvider().getKey(Constant.KEY_ALIAS_AES)
+        val secretKey = KeyStoreSecretKeyProvider.getKey("key-alias-aes")
 
         val rawText = "sample-text".toByteArray()
 
