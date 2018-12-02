@@ -51,4 +51,17 @@ class RSAEncryptionTest {
 
         Assert.assertEquals(String(rawText), String(decodedText))
     }
+
+    @Test
+    fun checkPrefs() {
+
+        val sp = SecureSharedPreferences(InstrumentationRegistry.getContext())
+
+        val actualVal = 2
+        sp.registerOnSharedPreferenceChangeListener { sharedPreferences, _ ->
+            Assert.assertEquals(actualVal, sp.getInt("number", 0))
+        }
+
+        sp.edit().putInt("number", actualVal).commit()
+    }
 }

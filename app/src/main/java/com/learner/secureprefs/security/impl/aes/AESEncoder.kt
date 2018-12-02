@@ -9,17 +9,14 @@ import javax.crypto.Cipher
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/25/2018
  */
-open class AESEncoder(securityKey: Key) : SecurityProcessor {
+open class AESEncoder(private val securityKey: Key) : SecurityProcessor {
 
-    private val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding").apply {
+    private val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+
+    override fun process(input: ByteArray): ByteArray = cipher.run {
         init(Cipher.ENCRYPT_MODE, securityKey)
-    }
 
-    override fun process(input: ByteArray): ByteArray {
-
-        val cipherText = cipher.doFinal(input)
-        val iv = cipher.iv
-
+        val cipherText = doFinal(input)
         return ByteBuffer.allocate(1 + iv.size + cipherText.size)
                 .put(iv.size.toByte())
                 .put(iv).put(cipherText).array()
