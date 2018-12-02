@@ -51,9 +51,7 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
         }
     }
 
-    override fun edit(): SharedPreferences.Editor {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun edit() = SecureEditor(preferences.edit())
 
     override fun getLong(key: String?, defValue: Long) =
             getValue(key, defValue)?.toLongOrNull() ?: defValue
@@ -61,13 +59,55 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
     override fun getFloat(key: String?, defValue: Float) =
             getValue(key, defValue)?.toFloatOrNull() ?: defValue
 
-    override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getStringSet(key: String?, defValues: MutableSet<String>?) = preferences.getStringSet(getEncoded(key), null)?.run {
+        hashSetOf<String>().apply { this@run.forEach { add(getDecoded(it) ?: "") } }
+    } ?: defValues
 
-    override fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) =
+            preferences.registerOnSharedPreferenceChangeListener(listener)
 
     override fun getString(key: String?, defValue: String?) = getValue(key, defValue) ?: defValue
+
+    inner class SecureEditor(editor: SharedPreferences.Editor) : SharedPreferences.Editor {
+
+        override fun clear(): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun putLong(key: String?, value: Long): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun putInt(key: String?, value: Int): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun remove(key: String?): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun putBoolean(key: String?, value: Boolean): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun putStringSet(key: String?, values: MutableSet<String>?): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun commit(): Boolean {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun putFloat(key: String?, value: Float): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun apply() {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun putString(key: String?, value: String?): SharedPreferences.Editor {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+    }
 }
