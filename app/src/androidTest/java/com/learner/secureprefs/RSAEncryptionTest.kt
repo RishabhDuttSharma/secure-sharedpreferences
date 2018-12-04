@@ -58,7 +58,7 @@ class RSAEncryptionTest {
         val sp = SecureSharedPreferences(InstrumentationRegistry.getContext())
 
         val actualVal = 2
-        sp.registerOnSharedPreferenceChangeListener { sharedPreferences, _ ->
+        sp.registerOnSharedPreferenceChangeListener { _, _ ->
             Assert.assertEquals(actualVal, sp.getInt("number", 0))
         }
 

@@ -16,7 +16,7 @@ import javax.crypto.spec.SecretKeySpec
  */
 class PrefsSecretKeyProvider(context: Context) : KeyProvider<SecretKey> {
 
-    private val providerAlias = "prefs-provider"
+    private val providerAlias = "prefs-secret-provider"
 
     private val encoder by lazy { RSAProcessor(Cipher.ENCRYPT_MODE, KeyStorePublicKeyProvider(context).getKey(providerAlias)) }
     private val decoder by lazy { RSAProcessor(Cipher.DECRYPT_MODE, KeyStorePrivateKeyProvider(context).getKey(providerAlias)) }
