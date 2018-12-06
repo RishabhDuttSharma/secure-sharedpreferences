@@ -39,7 +39,7 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
      * secured with RSA-KeyPair which is generated and stored inside AndroidKeyStore.
      */
     private val valueProcessor = with((if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-        PrefsSecretKeyProvider(context) else KeyStoreSecretKeyProvider).getKey("secure-prefs-key")) {
+        PrefsSecretKeyProvider(context) else KeyStoreSecretKeyProvider).getKey("$name-key")) {
         StringBase64Processor(AESEncoder(this), AESDecoder(this))
     }
 
@@ -151,7 +151,7 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
      * Implementation of SharedPreferences.Editor to persist Key-Values in a more Secure manner.
      *
      * Converts all representations of data supported by Editor to String for uniform persistence and
-     * retrieval of Encode Key-Values
+     * retrieval of Encoded Key-Values
      */
     inner class SecureEditor internal constructor(private val editor: SharedPreferences.Editor) : SharedPreferences.Editor {
 
