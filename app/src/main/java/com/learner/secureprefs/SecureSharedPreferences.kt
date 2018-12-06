@@ -3,18 +3,14 @@ package com.learner.secureprefs
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.util.Base64
 import com.learner.secureprefs.security.impl.KeyValueWrapper
 import com.learner.secureprefs.security.impl.StringBase64Processor
 import com.learner.secureprefs.security.impl.aes.AESDecoder
 import com.learner.secureprefs.security.impl.aes.AESEncoder
-import com.learner.secureprefs.security.impl.aes.AESIVProcessor
-import com.learner.secureprefs.security.impl.keyprovider.KeyStorePrivateKeyProvider
-import com.learner.secureprefs.security.impl.keyprovider.KeyStorePublicKeyProvider
 import com.learner.secureprefs.security.impl.keyprovider.KeyStoreSecretKeyProvider
 import com.learner.secureprefs.security.impl.keyprovider.PrefsSecretKeyProvider
-import com.learner.secureprefs.security.impl.rsa.RSAProcessor
-import java.security.SecureRandom
-import javax.crypto.Cipher
+import com.learner.secureprefs.security.impl.md.KeyHashGenerator
 
 /**
  * Developer: Rishabh Dutt Sharma
@@ -24,37 +20,23 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
 
     private val preferences = context.getSharedPreferences(name, mode)
 
-    private val keyProcessor: StringBase64Processor
     private val valueProcessor: StringBase64Processor
 
     init {
-
-        val secretKey = (if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) PrefsSecretKeyProvider(context)
-        else KeyStoreSecretKeyProvider).getKey("secure-prefs-key")
-        valueProcessor = StringBase64Processor(AESEncoder(secretKey), AESDecoder(secretKey))
-
-        val rsaProcessor = with("secret-iv-provider") {
-            StringBase64Processor(RSAProcessor(Cipher.ENCRYPT_MODE, KeyStorePublicKeyProvider(context).getKey(this)),
-                    RSAProcessor(Cipher.DECRYPT_MODE, KeyStorePrivateKeyProvider(context).getKey(this)))
-        }
-
-        with(rsaProcessor.encode("key_iv")) {
-            val encodedKeyIVValue = preferences.getString(this, null)
-            if (encodedKeyIVValue == null) ByteArray(32).apply { SecureRandom().nextBytes(this) }
-                    .also { preferences.edit().putString(this, rsaProcessor.encodeToString(it)).apply() }
-            else rsaProcessor.decodeToByteArray(encodedKeyIVValue)
-        }.also {
-
-
-            keyProcessor = StringBase64Processor(AESIVProcessor(Cipher.ENCRYPT_MODE, secretKey, it),
-                    AESIVProcessor(Cipher.DECRYPT_MODE, secretKey, it))
+        with((if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) PrefsSecretKeyProvider(context)
+        else KeyStoreSecretKeyProvider).getKey("secure-prefs-key")) {
+            valueProcessor = StringBase64Processor(AESEncoder(this), AESDecoder(this))
         }
     }
 
-    private fun getEncoded(processor: StringBase64Processor, value: String?) = if (value == null) null else processor.encode(value)
-    private fun getDecoded(processor: StringBase64Processor, value: String?) = if (value == null) null else processor.decode(value)
+    private fun getEncoded(processor: StringBase64Processor, value: String?) =
+            if (value == null) null else processor.encode(value)
 
-    private fun getEncodedKey(value: String?) = getEncoded(keyProcessor, value)
+    private fun getDecoded(processor: StringBase64Processor, value: String?) =
+            if (value == null) null else processor.decode(value)
+
+    private fun getEncodedKey(value: String?) = if (value == null) null else
+        Base64.encodeToString(KeyHashGenerator.process(value.toByteArray()), Base64.NO_WRAP)
 
     private fun getEncodedKeyValue(key: String?, value: String?) = getEncoded(valueProcessor,
             KeyValueWrapper.serialize(Pair(key ?: "", value ?: ""))
@@ -101,15 +83,15 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
     override fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) =
             preferences.registerOnSharedPreferenceChangeListener(listener)
 
-    override fun getString(key: String?, defValue: String?) = getValue(key, defValue)
-            ?: defValue
+    override fun getString(key: String?, defValue: String?) = getValue(key, defValue) ?: defValue
 
     inner class SecureEditor(private val editor: SharedPreferences.Editor) : SharedPreferences.Editor {
 
         override fun clear(): SharedPreferences.Editor = editor.clear()
 
-        private fun <T> putValue(key: String?, value: T?): SharedPreferences.Editor =
-                editor.putString(getEncodedKey(key), getEncodedKeyValue(key, value?.toString()))
+        private fun <T> putValue(key: String?, value: T?): SharedPreferences.Editor = apply {
+            editor.putString(getEncodedKey(key), getEncodedKeyValue(key, value?.toString()))
+        }
 
         override fun putLong(key: String?, value: Long) = putValue(key, value)
 
@@ -120,7 +102,7 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
         override fun putBoolean(key: String?, value: Boolean) = putValue(key, value)
 
         override fun putStringSet(key: String?, values: MutableSet<String>?): SharedPreferences.Editor = editor.putStringSet(getEncodedKey(key), hashSetOf<String>().apply {
-            values?.forEach { add(getEncodedValue(it) ?: "") }
+            values?.forEach { add(getEncodedKeyValue(key, it) ?: "") }
         })
 
         override fun commit() = editor.commit()
