@@ -12,7 +12,7 @@ import javax.crypto.spec.IvParameterSpec
 class AESIVProcessor(private val opMode: Int, private val securityKey: Key, private val Iv: ByteArray) : SecurityProcessor {
 
     private val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding").apply {
-        init(opMode, securityKey, IvParameterSpec(Iv))
+        init(opMode, securityKey, IvParameterSpec(ByteArray(16)))
     }
 
     override fun process(input: ByteArray): ByteArray = cipher.doFinal(input)

@@ -3,6 +3,7 @@ package com.learner.secureprefs
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import com.learner.secureprefs.security.impl.KeyValueWrapper
 import com.learner.secureprefs.security.impl.StringBase64Processor
 import com.learner.secureprefs.security.impl.aes.AESDecoder
 import com.learner.secureprefs.security.impl.aes.AESEncoder
@@ -39,10 +40,12 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
 
         with(rsaProcessor.encode("key_iv")) {
             val encodedKeyIVValue = preferences.getString(this, null)
-            if (encodedKeyIVValue == null) ByteArray(16).apply { SecureRandom().nextBytes(this) }
+            if (encodedKeyIVValue == null) ByteArray(32).apply { SecureRandom().nextBytes(this) }
                     .also { preferences.edit().putString(this, rsaProcessor.encodeToString(it)).apply() }
             else rsaProcessor.decodeToByteArray(encodedKeyIVValue)
         }.also {
+
+
             keyProcessor = StringBase64Processor(AESIVProcessor(Cipher.ENCRYPT_MODE, secretKey, it),
                     AESIVProcessor(Cipher.DECRYPT_MODE, secretKey, it))
         }
@@ -52,14 +55,18 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
     private fun getDecoded(processor: StringBase64Processor, value: String?) = if (value == null) null else processor.decode(value)
 
     private fun getEncodedKey(value: String?) = getEncoded(keyProcessor, value)
-    private fun getDecodedKey(value: String?) = getDecoded(keyProcessor, value)
 
-    private fun getEncodedValue(value: String?) = getEncoded(valueProcessor, value)
-    private fun getDecodedValue(value: String?) = getDecoded(valueProcessor, value)
+    private fun getEncodedKeyValue(key: String?, value: String?) = getEncoded(valueProcessor,
+            KeyValueWrapper.serialize(Pair(key ?: "", value ?: ""))
+    )
+
+    private fun getDecodedKeyValue(value: String?) = getDecoded(valueProcessor, value)?.run {
+        KeyValueWrapper.deserialize(this)
+    }
 
     private fun <T> getValue(key: String?, defValue: T?): String? {
         val prefsVal = preferences.getString(getEncodedKey(key), null)
-        return if (prefsVal != null) getDecodedValue(prefsVal) else defValue?.toString()
+        return if (prefsVal != null) getDecodedKeyValue(prefsVal)?.second else defValue?.toString()
     }
 
     override fun contains(key: String?) = preferences.contains(getEncodedKey(key))
@@ -74,8 +81,8 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
             getValue(key, defValue)?.toIntOrNull() ?: defValue
 
     override fun getAll(): MutableMap<String, *> = hashMapOf<String, String>().apply {
-        preferences.all.entries.forEach { entry ->
-            put(getDecodedKey(entry.key) ?: "", getDecodedValue(entry.value.toString()) ?: "")
+        preferences.all.entries.forEach {
+            getDecodedKeyValue(it.value.toString())?.run { put(first, second) }
         }
     }
 
@@ -88,20 +95,21 @@ class SecureSharedPreferences constructor(context: Context, name: String = "secu
             getValue(key, defValue)?.toFloatOrNull() ?: defValue
 
     override fun getStringSet(key: String?, defValues: MutableSet<String>?) = preferences.getStringSet(getEncodedKey(key), null)?.run {
-        hashSetOf<String>().apply { this@run.forEach { add(getDecodedValue(it) ?: "") } }
+        hashSetOf<String>().apply { this@run.forEach { add(getDecodedKeyValue(it)?.second ?: "") } }
     } ?: defValues
 
     override fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) =
             preferences.registerOnSharedPreferenceChangeListener(listener)
 
-    override fun getString(key: String?, defValue: String?) = getValue(key, defValue) ?: defValue
+    override fun getString(key: String?, defValue: String?) = getValue(key, defValue)
+            ?: defValue
 
     inner class SecureEditor(private val editor: SharedPreferences.Editor) : SharedPreferences.Editor {
 
         override fun clear(): SharedPreferences.Editor = editor.clear()
 
         private fun <T> putValue(key: String?, value: T?): SharedPreferences.Editor =
-                editor.putString(getEncodedKey(key), getEncodedValue(value?.toString() ?: ""))
+                editor.putString(getEncodedKey(key), getEncodedKeyValue(key, value?.toString()))
 
         override fun putLong(key: String?, value: Long) = putValue(key, value)
 
