@@ -11,6 +11,9 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 /**
+ * Provides [SecretKey] generated at run-time and stored inside SharedPreferences
+ *
+ *
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/25/2018
  */

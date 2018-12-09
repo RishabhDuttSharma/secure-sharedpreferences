@@ -8,6 +8,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
 /**
+ * Provides [SecretKey] generated and stored inside AndroidKeyStore
+ *
  * Developer: Rishabh Dutt Sharma
  * Dated: 12/1/2018
  */

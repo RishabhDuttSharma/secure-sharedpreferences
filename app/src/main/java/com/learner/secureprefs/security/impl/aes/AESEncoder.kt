@@ -6,6 +6,13 @@ import java.security.Key
 import javax.crypto.Cipher
 
 /**
+ * Encodes a given Input ByteArray and generates a serialized output consisting
+ * of IV and Ciphered output
+ *
+ * Algorithm: AES (Advanced Encryption Standards)
+ * Block Mode: CBC (Code Block Cipher)
+ * Padding: PKCS7Padding (Public Key Cryptography Standards)
+ *
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/25/2018
  */

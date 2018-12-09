@@ -11,6 +11,8 @@ import java.security.KeyPairGenerator
 import javax.security.auth.x500.X500Principal
 
 /**
+ * Collective implementation for Public/Private Keys generates and stored inside AndroidKeyStore
+ *
  * Developer: Rishabh Dutt Sharma
  * Dated: 12/1/2018
  */
@@ -34,5 +36,8 @@ abstract class KeyStoreKeyPairProvider<T>(private val context: Context) : KeySto
         resolve(generateKeyPair())
     }
 
+    /**
+     * Resolves the required Key from KeyPair
+     */
     abstract fun resolve(keyPair: KeyPair): T
 }

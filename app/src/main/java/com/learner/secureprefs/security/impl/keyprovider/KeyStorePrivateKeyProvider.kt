@@ -5,6 +5,8 @@ import java.security.KeyPair
 import java.security.PrivateKey
 
 /**
+ * Provides [PrivateKey] generated and stored inside AndroidKeyStore
+ *
  * Developer: Rishabh Dutt Sharma
  * Dated: 12/1/2018
  */

@@ -5,6 +5,14 @@ import java.security.Key
 import javax.crypto.Cipher
 
 /**
+ *
+ * Performs Encoding/Decoding on given input corresponding to specified operationMode and securityKey
+ *
+ * Algorithm: RSA (Rivest-Shamir-Adleman)
+ * Block Mode: ECB (Electronic CodeBook)
+ * Padding: PKCS1Padding (RSA Cryptography Standard)
+ *
+ *
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/25/2018
  */

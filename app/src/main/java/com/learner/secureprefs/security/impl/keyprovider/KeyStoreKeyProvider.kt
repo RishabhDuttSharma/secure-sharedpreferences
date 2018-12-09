@@ -5,6 +5,8 @@ import java.security.Key
 import java.security.KeyStore
 
 /**
+ * Abstract implementation of KeyProviderSpi to provide Keys generated and stored inside AndroidKeyStore
+ *
  * Developer: Rishabh Dutt Sharma
  * Dated: 11/25/2018
  */
