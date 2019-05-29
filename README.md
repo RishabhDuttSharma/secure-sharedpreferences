@@ -19,14 +19,15 @@ Manages generation of SecretKey for Android versions below API 23 and API 23+.
  * Values are encoded using a combination of Key-Value Serialization followed by AES-Transformation.
  
 ## Implementation
+**Initialization (use of singleton pattern is recommended)**
 ```
-// Initialization (use of singleton pattern is recommended)
-val prefs: SecureSharedPreferences = SecureSharedPreferences(this)
-
-// Save the key-values
+val prefs = SecureSharedPreferences(this)
+```
+**Saving a key-value pair**
+```
 prefs.edit().putString(key, value).commit()
-
-// Retrieve the value a given key
+```
+**Retrieving value for a key**
+```
 prefs.getString(key, defValue)
-
 ```
